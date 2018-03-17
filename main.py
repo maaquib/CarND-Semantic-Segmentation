@@ -55,12 +55,16 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
 
+    # https://discussions.udacity.com/t/network-not-learning-despite-adding-regularization/368781/9?u=maaquib
+    initializer = tf.truncated_normal_initializer(stddev=0.01)
+
     # 1x1 conv of layer 7
     layer7_out_conv = tf.layers.conv2d(vgg_layer7_out,
                                        num_classes,
                                        kernel_size=1,
                                        padding='same',
-                                       kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                       kernel_initializer=initializer,
+                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # Deconv_upsample layer 7 conv
     layer7_out_deconv = tf.layers.conv2d_transpose(layer7_out_conv,
@@ -68,14 +72,16 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                                    kernel_size=4,
                                                    strides=(2, 2),
                                                    padding='same',
-                                                   kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                                   kernel_initializer=initializer,
+                                                   kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
  
     # 1x1 conv of layer 4
     layer4_out_conv = tf.layers.conv2d(vgg_layer4_out,
                                        num_classes,
                                        kernel_size=1,
                                        padding='same',
-                                       kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                       kernel_initializer=initializer,
+                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # Skip Connections 1
     skip1 = tf.add(layer7_out_deconv, layer4_out_conv)
@@ -88,16 +94,18 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                                   kernel_size=4,
                                                   strides=(2, 2),
                                                   padding='same',
-                                                  kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                                  kernel_initializer=initializer,
+                                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # 1x1 conv of layer 3
     layer3_out_conv = tf.layers.conv2d(vgg_layer3_out,
                                        num_classes,
                                        kernel_size=1,
                                        padding='same',
-                                       kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                       kernel_initializer=initializer,
+                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
-    # Skip Connections 1
+    # Skip Connections 2
     skip2 = tf.add(skip1_out_deconv, layer3_out_conv)
 
 
@@ -108,7 +116,8 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                                   kernel_size=16,
                                                   strides=(8, 8),
                                                   padding='same',
-                                                  kernel_regularizer= tf.contrib.layers.l2_regularizer(1e-3))
+                                                  kernel_initializer=initializer,
+                                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     return skip2_out_deconv
 tests.test_layers(layers)
@@ -150,8 +159,8 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param keep_prob: TF Placeholder for dropout keep probability
     :param learning_rate: TF Placeholder for learning rate
     """
-    KEEP_PROB     = 0.5
-    LEARNING_RATE = 0.001
+    KEEP_PROB     = 0.75
+    LEARNING_RATE = 0.0001
 
     sess.run(tf.global_variables_initializer())
 
@@ -197,8 +206,8 @@ def run():
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
         # Build NN using load_vgg, layers, and optimize function
-        epochs        = 20
-        batch_size    = 32
+        epochs        = 50
+        batch_size    = 8
 
         correct_label = tf.placeholder(tf.int32, (None, None, None, num_classes))
         learning_rate = tf.placeholder(tf.float32)

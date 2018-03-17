@@ -1,4 +1,34 @@
 # Semantic Segmentation
+Self-Driving Car Engineer Nanodegree Program
+
+[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+
+## Overview
+In this project, the pixels of a road in images are labelled using a Fully Convolutional Network (FCN). A pre-trained VGG-16 network is loaded and transformed to a FCN. The fully connected layer from the pre-trained network is replaced with a 1x1 convolution to maintain spatial information. Transposed convolutions are used to upsample previous layer output and skip connections are added to build the final FCN (as described in the lessons). A standard cross entropy loss function is used to calculate training loss and an [AdamOptimizer](https://www.tensorflow.org/api_docs/python/tf/train/AdamOptimizer) is used to optimize the loss function. Using `tf.truncated_normal_initializer` as the kernel_initializer (with an stddev of 0.01) leads to further improvement in the segmentation.
+I tried a few combinations of hyperparameters before finalizing the model. A large batch size ( >= 64) for training caused `ResourceExhaustedError` on the GPU, forcing me to lower the batch to 8. Keep probability of 0.75 provided models with lower training loss as compared to 0.5 for the same number of epochs. Following were the final set of hyperparameters I ended up with for training the model
+```
+KEEP_PROB: 0.75
+LEARNING_RATE: 0.0001
+epochs: 50
+batch_size: 8
+```
+
+## Results
+The model is trained for 50 epochs and the training loss averages out around 0.02 by the end of the training. Below are a some images with road pixels classified by the fully convolutional network. The segmentation class is the pixels in green.
+
+![example0](./runs/1521308451.7508209/um_000003.png)
+![example1](./runs/1521308451.7508209/um_000004.png)
+![example2](./runs/1521308451.7508209/um_000010.png)
+![example3](./runs/1521308451.7508209/um_000019.png)
+![example4](./runs/1521308451.7508209/umm_000002.png)
+![example5](./runs/1521308451.7508209/umm_000008.png)
+![example6](./runs/1521308451.7508209/umm_000015.png)
+![example7](./runs/1521308451.7508209/uu_000005.png)
+![example8](./runs/1521308451.7508209/uu_000011.png)
+![example9](./runs/1521308451.7508209/uu_000076.png)
+
+---
+## Udacity instructions
 ### Introduction
 In this project, you'll label the pixels of a road in images using a Fully Convolutional Network (FCN).
 
